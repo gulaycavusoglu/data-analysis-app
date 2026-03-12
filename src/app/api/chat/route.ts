@@ -4,7 +4,6 @@ import type { ParsedData } from "@/types";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_MODEL = "anthropic/claude-4.6-opus";
-const DEFAULT_API_KEY = "[REDACTED]";
 const MAX_RESULT_ROWS_FOR_LLM = 200;
 const MAX_TOOL_ROUNDS = 20000;
 
@@ -152,7 +151,13 @@ async function executeRunSql(data: ParsedData, args: { queries?: string[] }): Pr
 
 export async function POST(request: NextRequest) {
   try {
-    const apiKey = process.env.OPENROUTER_API_KEY ?? DEFAULT_API_KEY;
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "OPENROUTER_API_KEY is not set. Add it to .env.local to use the AI analyst." },
+        { status: 503 }
+      );
+    }
 
     const body = await request.json();
     const messages: { role: string; content: string }[] = body.messages ?? [];
