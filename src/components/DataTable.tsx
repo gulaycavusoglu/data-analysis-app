@@ -21,10 +21,12 @@ export default function DataTable({ data, maxRows = 100 }: DataTableProps) {
   const formatCell = (value: unknown, type: string): string => {
     if (value == null) return "—";
     if (type === "date" && typeof value === "string") {
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return value;
       try {
-        return new Date(value).toLocaleDateString();
+        return d.toLocaleDateString();
       } catch {
-        return String(value);
+        return value;
       }
     }
     if (typeof value === "number" && !Number.isInteger(value)) {

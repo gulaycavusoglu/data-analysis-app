@@ -6,6 +6,29 @@ function quoteColumn(name: string): string {
   return '"' + String(name).replace(/"/g, '""') + '"';
 }
 
+/**
+ * Build SQLite-safe unique column names from possibly duplicate (case-insensitive) names.
+ * First occurrence keeps its name; subsequent duplicates get _2, _3, etc.
+ * Returns the names to use in the table and, for each, the original column key for row lookup.
+ */
+export function getUniqueColumnNames(columns: string[]): {
+  uniqueNames: string[];
+  originalByUnique: string[];
+} {
+  const seenLower = new Map<string, number>();
+  const uniqueNames: string[] = [];
+  const originalByUnique: string[] = [];
+  for (const c of columns) {
+    const key = c.toLowerCase();
+    const count = (seenLower.get(key) ?? 0) + 1;
+    seenLower.set(key, count);
+    const uniqueName = count === 1 ? c : `${c}_${count}`;
+    uniqueNames.push(uniqueName);
+    originalByUnique.push(c);
+  }
+  return { uniqueNames, originalByUnique };
+}
+
 /** Only allow a single SELECT statement per call; reject other SQL. */
 function isAllowedQuery(sql: string): boolean {
   const trimmed = sql.trim().toUpperCase();
@@ -40,27 +63,30 @@ export async function runSelectsOnData(
 
   const db = new Database(":memory:");
   try {
-    const cols = data.columns;
+    const { uniqueNames, originalByUnique } = getUniqueColumnNames(data.columns);
     const types = data.columnTypes;
-    const columnDefs = cols
-      .map((c) => {
-        const t = types[c] ?? "string";
+    const columnDefs = uniqueNames
+      .map((name, i) => {
+        const orig = originalByUnique[i];
+        const t = types[orig] ?? "string";
         const sqlType = t === "number" ? "REAL" : "TEXT";
-        return `${quoteColumn(c)} ${sqlType}`;
+        return `${quoteColumn(name)} ${sqlType}`;
       })
       .join(", ");
     db.exec(`CREATE TABLE data (${columnDefs})`);
 
-    const placeholders = cols.map(() => "?").join(", ");
-    const insertSql = `INSERT INTO data (${cols.map(quoteColumn).join(", ")}) VALUES (${placeholders})`;
+    const placeholders = uniqueNames.map(() => "?").join(", ");
+    const insertSql = `INSERT INTO data (${uniqueNames.map(quoteColumn).join(", ")}) VALUES (${placeholders})`;
     const insert = db.prepare(insertSql);
 
     for (const row of data.rows) {
-      const values = cols.map((c) => {
+      const values = originalByUnique.map((c) => {
         const v = row[c];
         if (v == null) return null;
         if (typeof v === "number" && !Number.isNaN(v)) return v;
-        if (v instanceof Date) return v.toISOString();
+        if (v instanceof Date) {
+          return Number.isNaN(v.getTime()) ? null : v.toISOString();
+        }
         return String(v);
       });
       insert.run(...values);

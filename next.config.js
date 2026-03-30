@@ -2,7 +2,8 @@
 const nextConfig = {
   experimental: {
     serverActions: {
-      bodySizeLimit: "10mb",
+      // Note: Route Handlers use the platform request limit too (e.g. Vercel ~4.5MB hobby).
+      bodySizeLimit: "50mb",
     },
   },
 };
