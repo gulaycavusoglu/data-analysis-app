@@ -21,6 +21,7 @@ Analyse data from **databases** (PostgreSQL, MySQL) or **files** (CSV, Excel). N
 - **Interactive landing page** — Hero section, gradient background, feature pills, and clear “get started” flow when no data is loaded.
 - **Dark theme** — Consistent, readable UI with CSS variables and Tailwind.
 - **TypeScript & modern stack** — Next.js 14, React 18, Tailwind, Recharts, PapaParse, xlsx, pg, mysql2, better-sqlite3.
+- **Auth0 login** — Sign in required to use the app; session via `@auth0/nextjs-auth0` (login at `/auth/login`).
 
 ---
 
@@ -70,6 +71,29 @@ A default API key is configured. To use your own:
    ```
 
 Restart the dev server after changing env.
+
+## Auth0 authentication
+
+The app requires login. Uses **Auth0** with `@auth0/nextjs-auth0` (Regular Web Application).
+
+1. Copy the example env file:
+   ```bash
+   cp .env.local.example .env.local
+   ```
+2. Create a **Regular Web Application** in the [Auth0 Dashboard](https://manage.auth0.com).
+3. Set **Allowed Callback URLs**: `http://localhost:3000/auth/callback`
+4. Set **Allowed Logout URLs**: `http://localhost:3000`
+5. Fill in `.env.local`:
+   ```bash
+   AUTH0_DOMAIN=your-tenant.auth0.com
+   AUTH0_CLIENT_ID=...
+   AUTH0_CLIENT_SECRET=...
+   AUTH0_SECRET=...   # openssl rand -hex 32
+   APP_BASE_URL=http://localhost:3000
+   ```
+6. Restart the dev server and open **http://localhost:3000** — you’ll be redirected to log in.
+
+Routes: `/auth/login`, `/auth/logout`, `/auth/callback` (handled by the SDK). All pages and APIs (`/api/upload`, `/api/query`, `/api/chat`) require a session.
 
 ## If you later install Node globally
 

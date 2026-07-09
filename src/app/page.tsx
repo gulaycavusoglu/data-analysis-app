@@ -6,6 +6,7 @@ import DataTable from "@/components/DataTable";
 import SummaryStats from "@/components/SummaryStats";
 import ChartPanel from "@/components/ChartPanel";
 import ChatWidget from "@/components/ChatWidget";
+import AuthNav from "@/components/AuthNav";
 import type { ParsedData } from "@/types";
 
 export default function Home() {
@@ -21,7 +22,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-md px-6 py-4 transition-shadow duration-300 hover:shadow-lg hover:shadow-black/10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-bold tracking-tight text-[var(--text)] sm:text-2xl">
               Data Analysis Studio
@@ -30,6 +31,7 @@ export default function Home() {
               Connect a database or upload CSV/Excel to explore and analyse your data
             </p>
           </div>
+          <AuthNav />
         </div>
       </header>
 

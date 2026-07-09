@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Pool } from "pg";
 import mysql from "mysql2/promise";
+import { requireAuth } from "@/lib/requireAuth";
 import type { ParsedData } from "@/types";
 
 function inferColumnTypes(rows: Record<string, unknown>[]): Record<string, "number" | "string" | "date"> {
@@ -28,6 +29,9 @@ function inferColumnTypes(rows: Record<string, unknown>[]): Record<string, "numb
 
 export async function POST(request: NextRequest) {
   try {
+    const { unauthorized } = await requireAuth(request);
+    if (unauthorized) return unauthorized;
+
     const body = await request.json();
     const { type, host, port, database, user, password, query } = body as {
       type: "postgres" | "mysql";

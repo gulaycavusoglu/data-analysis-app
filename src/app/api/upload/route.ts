@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/lib/requireAuth";
 
 /** Large CSV parse + JSON response (adjust on Vercel if timeouts occur). */
 export const maxDuration = 120;
@@ -155,6 +156,9 @@ function normalizeRows(rows: Record<string, string>[], columnTypes: Record<strin
 
 export async function POST(request: NextRequest) {
   try {
+    const { unauthorized } = await requireAuth(request);
+    if (unauthorized) return unauthorized;
+
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     if (!file) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runSelectsOnData } from "@/lib/sqlOnData";
+import { requireAuth } from "@/lib/requireAuth";
 import type { ParsedData } from "@/types";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -151,6 +152,9 @@ async function executeRunSql(data: ParsedData, args: { queries?: string[] }): Pr
 
 export async function POST(request: NextRequest) {
   try {
+    const { unauthorized } = await requireAuth(request);
+    if (unauthorized) return unauthorized;
+
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
