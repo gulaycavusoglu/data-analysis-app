@@ -81,19 +81,50 @@ The app requires login. Uses **Auth0** with `@auth0/nextjs-auth0` (Regular Web A
    cp .env.local.example .env.local
    ```
 2. Create a **Regular Web Application** in the [Auth0 Dashboard](https://manage.auth0.com).
-3. Set **Allowed Callback URLs**: `http://localhost:3000/auth/callback`
-4. Set **Allowed Logout URLs**: `http://localhost:3000`
+3. Set **Allowed Callback URLs**:
+   - `http://localhost:3000/auth/callback`
+   - `https://data-analysis-amber.vercel.app/auth/callback`
+4. Set **Allowed Logout URLs**:
+   - `http://localhost:3000`
+   - `https://data-analysis-amber.vercel.app`
 5. Fill in `.env.local`:
    ```bash
    AUTH0_DOMAIN=your-tenant.auth0.com
    AUTH0_CLIENT_ID=...
    AUTH0_CLIENT_SECRET=...
    AUTH0_SECRET=...   # openssl rand -hex 32
-   APP_BASE_URL=http://localhost:3000
    ```
+   `APP_BASE_URL` is optional locally — the app uses `http://localhost:3000` in development automatically.
 6. Restart the dev server and open **http://localhost:3000** — you’ll be redirected to log in.
 
 Routes: `/auth/login`, `/auth/logout`, `/auth/callback` (handled by the SDK). All pages and APIs (`/api/upload`, `/api/query`, `/api/chat`) require a session.
+
+## Deploy to Vercel
+
+Production URL: **https://data-analysis-amber.vercel.app**
+
+The app picks the Auth0 base URL automatically:
+
+| Environment | Base URL |
+|-------------|----------|
+| Local (`npm run dev`) | `http://localhost:3000` |
+| Vercel production | `https://data-analysis-amber.vercel.app` |
+
+**Vercel environment variables** (Settings → Environment Variables):
+
+| Variable | Required |
+|----------|----------|
+| `AUTH0_DOMAIN` | Yes |
+| `AUTH0_CLIENT_ID` | Yes |
+| `AUTH0_CLIENT_SECRET` | Yes |
+| `AUTH0_SECRET` | Yes |
+| `OPENROUTER_API_KEY` | Yes (for AI chat) |
+| `OPENROUTER_MODEL` | Optional |
+| `APP_BASE_URL` | Optional — only if you need to override the auto URL |
+
+You do **not** need `APP_BASE_URL` on Vercel unless you want to override; production uses `https://data-analysis-amber.vercel.app` when `VERCEL_ENV=production`.
+
+After adding env vars, redeploy from the Vercel dashboard.
 
 ## If you later install Node globally
 

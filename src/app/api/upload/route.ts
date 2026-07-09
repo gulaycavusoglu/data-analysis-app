@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/requireAuth";
 
-/** Large CSV parse + JSON response (adjust on Vercel if timeouts occur). */
-export const maxDuration = 120;
+/** Large CSV parse + JSON response (Vercel hobby max 60s). */
+export const maxDuration = 60;
 import Papa from "papaparse";
 import type { ParseResult } from "papaparse";
 import * as XLSX from "xlsx";
